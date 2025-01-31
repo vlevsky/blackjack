@@ -253,7 +253,12 @@
     document.getElementById('gameStatus').textContent = message;
     document.getElementById('actions').style.display = 'none';
     document.getElementById('gameResult').textContent = message;
-    balance += (message.includes('win')) ? bet * 2 : 0;
+    
+    if (message.includes('lose')) {
+      balance -= bet; // Lose the bet amount if you lose
+    } else if (message.includes('win')) {
+      balance += bet * 2; // Win the bet amount * 2
+    }
     document.getElementById('balance').textContent = balance;
   }
 
