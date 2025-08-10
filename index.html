@@ -6,31 +6,50 @@
   <title>Blackjack</title>
   <style>
     /* Body & Background */
+    :root {
+      --primary: #ff9a9e;
+      --secondary: #fad0c4;
+      --dark: #141e30;
+      --darker: #243b55;
+      --light: #f0f0f0;
+      --success: #4CAF50;
+      --danger: #f44336;
+      --warning: #ffc107;
+      --info: #2196F3;
+      --disabled: #888888;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      color: #f0f0f0;
+      background: linear-gradient(135deg, var(--dark), var(--darker));
+      color: var(--light);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
+      overflow-x: hidden;
     }
     
     /* Game Area Container */
     #game-area {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 15px;
-      padding: 20px;
-      width: 90%;
-      max-width: 600px;
+      padding: 25px;
+      width: 95%;
+      max-width: 800px;
       box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(255, 255, 255, 0.18);
       text-align: center;
+      transition: all 0.3s ease;
     }
     
     /* Headings & Text */
@@ -38,124 +57,697 @@
       margin-bottom: 10px;
       font-size: 3em;
       text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 5px rgba(255, 154, 158, 0.5);
+      }
+      to {
+        text-shadow: 0 0 15px rgba(255, 154, 158, 0.8), 0 0 20px rgba(255, 154, 158, 0.6);
+      }
     }
     
     p {
       font-size: 1.2em;
+      margin: 5px 0;
     }
     
     /* Input Field */
+    .bet-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    
     input[type="number"] {
-      padding: 8px;
+      padding: 10px;
       border: none;
       border-radius: 5px;
-      margin: 5px;
-      width: 80px;
+      margin: 0 5px;
+      width: 100px;
       text-align: center;
       font-size: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s;
+    }
+    
+    input[type="number"]:focus {
+      outline: none;
+      box-shadow: 0 0 10px rgba(255, 154, 158, 0.8);
+      transform: scale(1.05);
+    }
+    
+    /* Quick Bet Buttons */
+    .quick-bets {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 10px 0;
+      gap: 5px;
+    }
+    
+    .quick-bet-btn {
+      padding: 8px 12px;
+      font-size: 14px;
+      min-width: 60px;
+    }
+    
+    /* Bet Adjustment Buttons */
+    .bet-adjust {
+      padding: 8px 12px;
+      font-size: 14px;
+      min-width: 40px;
     }
     
     /* Buttons */
     button {
-      margin: 5px;
-      padding: 10px 20px;
+      margin: 8px;
+      padding: 12px 24px;
       font-size: 16px;
       cursor: pointer;
-      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
       border: none;
       border-radius: 25px;
-      transition: transform 0.2s, background 0.3s;
+      transition: all 0.3s;
       box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+      color: #333;
+      font-weight: bold;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    button:focus:not(:active)::after {
+      animation: ripple 0.6s ease-out;
+    }
+    
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(20, 20);
+        opacity: 0;
+      }
     }
     
     button:hover {
-      transform: translateY(-2px);
-      background: linear-gradient(45deg, #fad0c4, #ff9a9e);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
     
     button:active {
-      transform: translateY(0);
-      background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+      transform: translateY(1px);
+    }
+    
+    button:disabled {
+      background: var(--disabled) !important;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
     }
     
     .small-button {
-      padding: 8px 12px;
+      padding: 8px 16px;
       font-size: 14px;
     }
     
-    /* Card Display */
-    .cards {
-      display: inline-block;
-      background: #fff;
-      color: #000;
-      padding: 10px 15px;
-      margin: 5px;
-      border-radius: 8px;
-      font-size: 1.5em;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transition: transform 0.2s;
+    .btn-success {
+      background: linear-gradient(45deg, var(--success), #8BC34A);
     }
     
-    .cards:hover {
-      transform: scale(1.1);
+    .btn-danger {
+      background: linear-gradient(45deg, var(--danger), #FF5252);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(45deg, var(--warning), #FFD54F);
+    }
+    
+    .btn-info {
+      background: linear-gradient(45deg, var(--info), #64B5F6);
+    }
+    
+    /* Card Display */
+    .card-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 15px 0;
+      min-height: 120px;
+    }
+    
+    .card {
+      width: 80px;
+      height: 120px;
+      background: white;
+      border-radius: 8px;
+      margin: 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      color: black;
+      font-weight: bold;
+      font-size: 1.2em;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      position: relative;
+      transform-style: preserve-3d;
+      transition: all 0.5s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .card.red {
+      color: #D32F2F;
+    }
+    
+    .card.black {
+      color: #212121;
+    }
+    
+    .card-value {
+      font-size: 1.5em;
+      text-align: center;
+      margin: auto;
+    }
+    
+    .card-corner {
+      position: absolute;
+      font-size: 1em;
+    }
+    
+    .top-left {
+      top: 5px;
+      left: 10px;
+    }
+    
+    .bottom-right {
+      bottom: 5px;
+      right: 10px;
+      transform: rotate(180deg);
+    }
+    
+    .card-back {
+      background: linear-gradient(45deg, #D32F2F, #F44336);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .card-back::before {
+      content: '♠';
+      font-size: 2em;
+      opacity: 0.3;
+    }
+    
+    /* Hand containers */
+    .hand {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    
+    .hand.active {
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+      background: rgba(255, 215, 0, 0.1);
+    }
+    
+    /* Game status */
+    #result {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin: 20px 0;
+      min-height: 2em;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    
+    .win {
+      color: #4CAF50;
+      animation: pulse 0.5s infinite alternate;
+    }
+    
+    .lose {
+      color: #F44336;
+    }
+    
+    .push {
+      color: #FFC107;
+    }
+    
+    @keyframes pulse {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.05);
+      }
+    }
+    
+    /* Split hands container */
+    .split-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .split-hand {
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      top: -10px;
+      z-index: 999;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      #game-area {
+        width: 100%;
+        padding: 15px;
+        border-radius: 0;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      .card {
+        width: 60px;
+        height: 90px;
+        font-size: 1em;
+      }
+      
+      .card-value {
+        font-size: 1.2em;
+      }
+      
+      button {
+        padding: 10px 15px;
+        font-size: 14px;
+        margin: 5px;
+      }
+      
+      .split-hand {
+        min-width: 100%;
+      }
+      
+      .bet-controls {
+        flex-direction: column;
+      }
+      
+      .bet-adjust {
+        margin-top: 5px;
+      }
+    }
+    
+    /* Animations */
+    @keyframes dealCard {
+      0% {
+        transform: translateY(-100px) rotateY(180deg);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0) rotateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .deal-animation {
+      animation: dealCard 0.5s ease-out forwards;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .shake {
+      animation: shake 0.5s;
+    }
+    
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.9em;
+    }
+    
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Stats display */
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    
+    .stat-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 8px;
+      margin: 5px;
+      min-width: 100px;
+    }
+    
+    /* Insurance section */
+    .insurance-section {
+      margin: 15px 0;
+      padding: 10px;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    /* Warning modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, var(--dark), var(--darker));
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 500px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
   <h1>Blackjack</h1>
   <div id="game-area">
-    <p>Balance: $<span id="balance">1000</span></p>
-    <div>
-      <label for="bet">Bet Amount: </label>
-      <input type="number" id="bet" value="100" min="10" max="1000" />
-      <button onclick="startGame()">Place Bet</button>
-      <button onclick="allIn()" class="small-button">All In</button>
-      <button onclick="topUp()" class="small-button">Top Up</button>
-    </div>
-    <div id="game">
-      <p>
-        Dealer's Hand:
-        <span id="dealer-hand"></span>
-        (Total: <span id="dealer-total">0</span>)
-      </p>
-      <p>
-        Your Hand:
-        <span id="player-hand"></span>
-        (Total: <span id="player-total">0</span>)
-      </p>
-      <div>
-        <button onclick="hit()" id="hit" disabled>Hit</button>
-        <button onclick="stand()" id="stand" disabled>Stand</button>
-        <button onclick="doubleDown()" id="double" disabled>Double Down</button>
+    <div class="stats">
+      <div class="stat-box">
+        <p>Balance: $<span id="balance">1000</span></p>
       </div>
-      <p id="result"></p>
+      <div class="stat-box">
+        <p>Current Bet: $<span id="current-bet">0</span></p>
+      </div>
+      <div class="stat-box">
+        <p>Insurance: $<span id="insurance-bet">0</span></p>
+      </div>
+    </div>
+    
+    <div id="bet-section">
+      <div class="bet-controls">
+        <button class="bet-adjust" onclick="adjustBet(0.5)">1/2</button>
+        <input type="number" id="bet" value="100" min="1" step="1" />
+        <button class="bet-adjust" onclick="adjustBet(2)">2x</button>
+      </div>
+      
+      <div class="quick-bets">
+        <button class="quick-bet-btn" onclick="setQuickBet(0.05)">5%</button>
+        <button class="quick-bet-btn" onclick="setQuickBet(0.1)">10%</button>
+        <button class="quick-bet-btn" onclick="setQuickBet(0.25)">25%</button>
+        <button class="quick-bet-btn" onclick="setQuickBet(0.5)">50%</button>
+      </div>
+      
+      <div>
+        <button onclick="placeBet()">Place Bet</button>
+        <button onclick="allIn()" class="small-button">All In</button>
+        <button id="top-up-btn" onclick="topUp()" class="small-button">Top Up</button>
+      </div>
+    </div>
+    
+    <div id="insurance-section" class="insurance-section" style="display: none;">
+      <p>Dealer shows an Ace. Would you like insurance?</p>
+      <button onclick="takeInsurance()" class="btn-info small-button">Take Insurance ($<span id="insurance-amount">0</span>)</button>
+      <button onclick="declineInsurance()" class="btn-warning small-button">Decline Insurance</button>
+    </div>
+    
+    <div id="dealer-section" class="hand">
+      <p>Dealer's Hand: (<span id="dealer-total">0</span>)</p>
+      <div id="dealer-hand" class="card-container"></div>
+    </div>
+    
+    <div id="player-section">
+      <div id="main-hand" class="hand active">
+        <p>Your Hand: (<span id="player-total">0</span>)</p>
+        <div id="player-hand" class="card-container"></div>
+      </div>
+      
+      <div id="split-hands" class="split-container" style="display: none;">
+        <!-- Split hands will be added here dynamically -->
+      </div>
+    </div>
+    
+    <div id="action-buttons">
+      <button onclick="hit()" id="hit" disabled>Hit</button>
+      <button onclick="stand()" id="stand" disabled>Stand</button>
+      <button onclick="doubleDown()" id="double" disabled>Double Down</button>
+      <button onclick="split()" id="split" disabled>Split</button>
+      <div class="tooltip">
+        <button id="hint-btn" class="small-button btn-info" onclick="showHintModal()">Hint ($<span id="hint-cost">0</span>)</button>
+        <span class="tooltiptext">Click to purchase hint (10% of bet). Cost will be deducted from balance if possible, otherwise from your bet.</span>
+      </div>
+    </div>
+    
+    <p id="result"></p>
+  </div>
+  
+  <!-- Hint Purchase Modal -->
+  <div id="hint-modal" class="modal">
+    <div class="modal-content">
+      <h3>Purchase Hint</h3>
+      <p id="hint-modal-text">This hint will cost $<span id="hint-modal-cost">0</span>. Would you like to proceed?</p>
+      <p>If you don't have enough balance, the cost will be deducted from your bet.</p>
+      <div class="modal-buttons">
+        <button onclick="purchaseHint(true)" class="btn-success">Yes, use my balance</button>
+        <button onclick="purchaseHint(false)" class="btn-warning">No, lower my bet instead</button>
+        <button onclick="closeHintModal()" class="btn-danger">Cancel</button>
+      </div>
     </div>
   </div>
+  
   <script>
+    // Game state variables
     let balance = 1000;
     let playerHand = [];
     let dealerHand = [];
+    let splitHands = [];
+    let currentHandIndex = 0;
     let deck = [];
     let betAmount = 0;
+    let insuranceBet = 0;
     let gameActive = false;
+    let insuranceOffered = false;
+    let insuranceTaken = false;
+    
+    // DOM elements
+    const balanceEl = document.getElementById('balance');
+    const currentBetEl = document.getElementById('current-bet');
+    const insuranceBetEl = document.getElementById('insurance-bet');
+    const betInput = document.getElementById('bet');
+    const dealerHandEl = document.getElementById('dealer-hand');
+    const playerHandEl = document.getElementById('player-hand');
+    const dealerTotalEl = document.getElementById('dealer-total');
+    const playerTotalEl = document.getElementById('player-total');
+    const resultEl = document.getElementById('result');
+    const hitBtn = document.getElementById('hit');
+    const standBtn = document.getElementById('stand');
+    const doubleBtn = document.getElementById('double');
+    const splitBtn = document.getElementById('split');
+    const insuranceSection = document.getElementById('insurance-section');
+    const insuranceAmountEl = document.getElementById('insurance-amount');
+    const splitHandsContainer = document.getElementById('split-hands');
+    const mainHandSection = document.getElementById('main-hand');
+    const hintTextEl = document.getElementById('hint-text');
+    const hintCostEl = document.getElementById('hint-cost');
+    const hintModal = document.getElementById('hint-modal');
+    const hintModalCostEl = document.getElementById('hint-modal-cost');
+    const hintModalTextEl = document.getElementById('hint-modal-text');
+    const topUpBtn = document.getElementById('top-up-btn');
+    
+    // Card suits for display
+    const suits = ['♥', '♦', '♣', '♠'];
+    
+    // Initialize the game
+    function initGame() {
+      updateBalance();
+      updateTopUpButton();
+      updateHintCost();
+    }
+    
+    // Update the hint cost display
+    function updateHintCost() {
+      const currentBet = parseInt(betInput.value) || 0;
+      const cost = Math.max(1, Math.floor(currentBet * 0.1));
+      hintCostEl.textContent = cost;
+    }
+    
+    // Show hint purchase modal
+    function showHintModal() {
+      if (gameActive) return;
+      
+      const currentBet = parseInt(betInput.value) || 0;
+      const cost = Math.max(1, Math.floor(currentBet * 0.1));
+      
+      hintModalCostEl.textContent = cost;
+      hintModalTextEl.textContent = `This hint will cost $${cost}. Would you like to proceed?`;
+      hintModal.style.display = 'block';
+    }
+    
+    // Close hint modal
+    function closeHintModal() {
+      hintModal.style.display = 'none';
+    }
+    
+    // Purchase hint
+    function purchaseHint(useBalance) {
+      const currentBet = parseInt(betInput.value) || 0;
+      const cost = Math.max(1, Math.floor(currentBet * 0.1));
+      
+      if (useBalance && balance >= cost) {
+        balance -= cost;
+        updateBalance();
+      } else {
+        // Deduct from bet
+        const newBet = Math.max(1, currentBet - cost);
+        betInput.value = newBet;
+      }
+      
+      updateHint();
+      closeHintModal();
+    }
+    
+    // Update top up button state
+    function updateTopUpButton() {
+      if (balance < 1000) {
+        topUpBtn.disabled = false;
+        topUpBtn.style.background = 'linear-gradient(45deg, var(--primary), var(--secondary))';
+      } else {
+        topUpBtn.disabled = true;
+        topUpBtn.style.background = 'var(--disabled)';
+      }
+    }
+    
+    // Adjust bet by multiplier (0.5 for half, 2 for double)
+    function adjustBet(multiplier) {
+      let currentBet = parseInt(betInput.value) || 100;
+      let newBet = Math.max(1, Math.floor(currentBet * multiplier));
+      betInput.value = newBet;
+      updateHintCost();
+    }
+    
+    // Set quick bet based on percentage of balance
+    function setQuickBet(percentage) {
+      let quickBet = Math.max(1, Math.floor(balance * percentage));
+      betInput.value = quickBet;
+      updateHintCost();
+    }
     
     function createDeck() {
       let values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
       deck = [];
-      for (let value of values) {
-        deck.push({ value });
+      
+      // Create 6 decks (standard for casino blackjack)
+      for (let d = 0; d < 6; d++) {
+        for (let suit of suits) {
+          for (let value of values) {
+            deck.push({ 
+              value,
+              suit,
+              color: (suit === '♥' || suit === '♦') ? 'red' : 'black'
+            });
+          }
+        }
       }
-      deck = deck.concat(deck).concat(deck).concat(deck);
-      deck.sort(() => Math.random() - 0.5);
+      
+      // Shuffle the deck
+      shuffleDeck();
+    }
+    
+    function shuffleDeck() {
+      // Fisher-Yates shuffle algorithm
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
     }
     
     function drawCard() {
+      if (deck.length < 20) {
+        // Reshuffle when we're running low on cards
+        createDeck();
+      }
       return deck.pop();
     }
     
     function calculateHand(hand) {
       let sum = 0;
       let aces = 0;
+      
       for (let card of hand) {
         if (card.value === 'A') {
           sum += 11;
@@ -166,145 +758,602 @@
           sum += parseInt(card.value);
         }
       }
+      
+      // Adjust for aces if needed
       while (sum > 21 && aces > 0) {
         sum -= 10;
         aces--;
       }
+      
       return sum;
     }
     
-    function startGame() {
-      betAmount = parseInt(document.getElementById("bet").value);
-      if (betAmount > balance || betAmount < 10) {
-        alert("Invalid bet amount!");
-        return;
+    function renderCard(card, isHidden = false) {
+      const cardEl = document.createElement('div');
+      cardEl.className = `card ${isHidden ? 'card-back' : card.color} deal-animation`;
+      
+      if (!isHidden) {
+        cardEl.innerHTML = `
+          <div class="card-corner top-left">${card.value}<br>${card.suit}</div>
+          <div class="card-value">${card.value} ${card.suit}</div>
+          <div class="card-corner bottom-right">${card.value}<br>${card.suit}</div>
+        `;
       }
-      balance -= betAmount;
-      document.getElementById("balance").innerText = balance;
-      createDeck();
-      playerHand = [drawCard(), drawCard()];
-      dealerHand = [drawCard(), drawCard()];
-      gameActive = true;
-      document.getElementById("result").innerText = "";
-      updateDisplay();
-      // Enable game buttons
-      document.getElementById("hit").disabled = false;
-      document.getElementById("stand").disabled = false;
-      document.getElementById("double").disabled = false;
+      
+      return cardEl;
+    }
+    
+    function renderHand(hand, element, hideFirstCard = false) {
+      element.innerHTML = '';
+      
+      hand.forEach((card, index) => {
+        const isHidden = hideFirstCard && index === 0;
+        element.appendChild(renderCard(card, isHidden));
+      });
     }
     
     function updateDisplay() {
-      document.getElementById("player-hand").innerHTML = playerHand.map(c => `<span class='cards'>${c.value}</span>`).join(" ");
-      document.getElementById("dealer-hand").innerHTML = dealerHand.map(c => `<span class='cards'>${c.value}</span>`).join(" ");
-      document.getElementById("player-total").innerText = calculateHand(playerHand);
-      document.getElementById("dealer-total").innerText = calculateHand(dealerHand);
+      // Render dealer's hand (hide first card if game is active)
+      renderHand(dealerHand, dealerHandEl, gameActive && !insuranceOffered);
+      
+      // Render player's main hand
+      renderHand(playerHand, playerHandEl);
+      
+      // Update totals
+      dealerTotalEl.textContent = gameActive && !insuranceOffered ? 
+        (dealerHand.length > 0 ? '?' : '0') : 
+        calculateHand(dealerHand);
+      
+      playerTotalEl.textContent = calculateHand(playerHand);
+      
+      // Update split hands if they exist
+      if (splitHands.length > 0) {
+        splitHandsContainer.style.display = 'flex';
+        
+        // Clear existing split hands
+        splitHandsContainer.innerHTML = '';
+        
+        // Render each split hand
+        splitHands.forEach((hand, index) => {
+          const handContainer = document.createElement('div');
+          handContainer.className = `split-hand hand ${currentHandIndex === index + 1 ? 'active' : ''}`;
+          handContainer.innerHTML = `
+            <p>Split Hand ${index + 1}: (<span class="split-total">${calculateHand(hand)}</span>)</p>
+            <div class="card-container split-hand-${index}"></div>
+          `;
+          
+          const cardContainer = handContainer.querySelector(`.split-hand-${index}`);
+          renderHand(hand, cardContainer);
+          
+          splitHandsContainer.appendChild(handContainer);
+        });
+      } else {
+        splitHandsContainer.style.display = 'none';
+      }
+      
+      // Highlight active hand
+      if (currentHandIndex === 0) {
+        mainHandSection.classList.add('active');
+      } else {
+        mainHandSection.classList.remove('active');
+      }
+      
+      // Update button states
+      updateButtonStates();
+      
+      // Update hint
+      updateHint();
+    }
+    
+    function updateButtonStates() {
+      if (!gameActive) {
+        hitBtn.disabled = true;
+        standBtn.disabled = true;
+        doubleBtn.disabled = true;
+        splitBtn.disabled = true;
+        return;
+      }
+      
+      const currentHand = currentHandIndex === 0 ? playerHand : splitHands[currentHandIndex - 1];
+      const handValue = calculateHand(currentHand);
+      const canSplit = currentHandIndex === 0 && 
+                       playerHand.length === 2 && 
+                       playerHand[0].value === playerHand[1].value && 
+                       balance >= betAmount;
+      
+      hitBtn.disabled = handValue >= 21;
+      standBtn.disabled = handValue >= 21;
+      doubleBtn.disabled = currentHand.length !== 2 || balance < betAmount;
+      splitBtn.disabled = !canSplit;
+    }
+    
+    function updateHint() {
+      if (!gameActive || insuranceOffered || dealerHand.length === 0) {
+        hintTextEl.textContent = 'Basic strategy hint will appear here';
+        return;
+      }
+      
+      const dealerUpCard = dealerHand[0];
+      const dealerValue = dealerUpCard.value === 'A' ? 'A' : 
+                         ['K', 'Q', 'J', '10'].includes(dealerUpCard.value) ? '10' : 
+                         dealerUpCard.value;
+      
+      const currentHand = currentHandIndex === 0 ? playerHand : splitHands[currentHandIndex - 1];
+      const handValue = calculateHand(currentHand);
+      const isSoft = currentHand.some(card => card.value === 'A') && 
+                    calculateHand(currentHand) - 10 <= 11;
+      
+      let hint = '';
+      
+      // Basic strategy hints
+      if (currentHand.length === 2 && currentHand[0].value === currentHand[1].value) {
+        // Pair splitting
+        const pairValue = currentHand[0].value;
+        if (pairValue === 'A' || pairValue === '8') {
+          hint = 'Always split';
+        } else if (pairValue === '10' || pairValue === '5' || pairValue === '4') {
+          hint = 'Never split';
+        } else if (pairValue === '9') {
+          hint = dealerValue === '7' || dealerValue === '10' || dealerValue === 'A' ? 'Stand' : 'Split';
+        } else if (pairValue === '7' || pairValue === '3' || pairValue === '2') {
+          hint = dealerValue <= '7' ? 'Split' : 'Hit';
+        } else if (pairValue === '6') {
+          hint = dealerValue <= '6' ? 'Split' : 'Hit';
+        }
+      } else if (isSoft) {
+        // Soft totals (Ace counted as 11)
+        const softValue = handValue - 11;
+        if (softValue <= 7) {
+          hint = 'Hit';
+        } else if (softValue === 8) {
+          hint = dealerValue === '6' ? 'Double if possible, otherwise stand' : 'Stand';
+        } else {
+          hint = 'Stand';
+        }
+      } else {
+        // Hard totals
+        if (handValue <= 11) {
+          hint = 'Hit';
+        } else if (handValue === 12) {
+          hint = dealerValue <= '3' || dealerValue >= '7' ? 'Hit' : 'Stand';
+        } else if (handValue >= 13 && handValue <= 16) {
+          hint = dealerValue <= '6' ? 'Stand' : 'Hit';
+        } else {
+          hint = 'Stand';
+        }
+        
+        // Doubling down opportunities
+        if (currentHand.length === 2) {
+          if (handValue === 11) {
+            hint = 'Double down';
+          } else if (handValue === 10 && dealerValue <= '9') {
+            hint = 'Double down';
+          } else if (handValue === 9 && dealerValue <= '6') {
+            hint = 'Double down';
+          }
+        }
+      }
+      
+      hintTextEl.textContent = hint || 'No specific advice';
+    }
+    
+    function placeBet() {
+      betAmount = parseInt(betInput.value);
+      
+      if (isNaN(betAmount) || betAmount < 1) {
+        showResult('Minimum bet is $1!', 'lose');
+        return;
+      }
+      
+      if (betAmount > balance) {
+        showResult('You don\'t have enough balance!', 'lose');
+        return;
+      }
+      
+      // Reset game state
+      playerHand = [];
+      dealerHand = [];
+      splitHands = [];
+      currentHandIndex = 0;
+      insuranceBet = 0;
+      insuranceOffered = false;
+      insuranceTaken = false;
+      
+      // Deduct bet from balance
+      balance -= betAmount;
+      updateBalance();
+      currentBetEl.textContent = betAmount;
+      insuranceBetEl.textContent = insuranceBet;
+      
+      // Create and shuffle deck
+      createDeck();
+      
+      // Deal initial cards
+      playerHand.push(drawCard());
+      dealerHand.push(drawCard());
+      playerHand.push(drawCard());
+      dealerHand.push(drawCard());
+      
+      gameActive = true;
+      resultEl.textContent = '';
+      resultEl.className = '';
+      
+      // Check for insurance opportunity
+      if (dealerHand[0].value === 'A') {
+        offerInsurance();
+      } else {
+        updateDisplay();
+      }
+    }
+    
+    function offerInsurance() {
+      insuranceOffered = true;
+      insuranceAmountEl.textContent = Math.floor(betAmount / 2);
+      insuranceSection.style.display = 'block';
+      updateButtonStates();
+    }
+    
+    function takeInsurance() {
+      insuranceBet = Math.floor(betAmount / 2);
+      if (insuranceBet > balance) {
+        showResult('Not enough balance for insurance!', 'lose');
+        return;
+      }
+      
+      balance -= insuranceBet;
+      updateBalance();
+      insuranceBetEl.textContent = insuranceBet;
+      insuranceTaken = true;
+      insuranceSection.style.display = 'none';
+      insuranceOffered = false;
+      
+      // Check for blackjack immediately
+      checkDealerBlackjack();
+    }
+    
+    function declineInsurance() {
+      insuranceSection.style.display = 'none';
+      insuranceOffered = false;
+      updateDisplay();
+    }
+    
+    function checkDealerBlackjack() {
+      const dealerBJ = calculateHand(dealerHand) === 21;
+      
+      if (dealerBJ) {
+        // Show dealer's card
+        renderHand(dealerHand, dealerHandEl, false);
+        dealerTotalEl.textContent = '21';
+        
+        // Check player blackjack
+        const playerBJ = calculateHand(playerHand) === 21;
+        
+        if (playerBJ) {
+          // Push - return original bet
+          balance += betAmount;
+          showResult('Both have Blackjack! Push.', 'push');
+        } else {
+          // Player loses unless they took insurance
+          if (insuranceTaken) {
+            // Insurance pays 2:1
+            balance += insuranceBet * 3;
+            showResult('Dealer has Blackjack. Insurance paid 2:1.', 'lose');
+          } else {
+            showResult('Dealer has Blackjack! You lose.', 'lose');
+          }
+        }
+        
+        endGame();
+      } else {
+        if (insuranceTaken) {
+          showResult('Dealer does not have Blackjack. Insurance lost.', 'info');
+        }
+        updateDisplay();
+      }
     }
     
     function hit() {
       if (!gameActive) return;
-      playerHand.push(drawCard());
+      
+      const currentHand = currentHandIndex === 0 ? playerHand : splitHands[currentHandIndex - 1];
+      currentHand.push(drawCard());
+      
       updateDisplay();
-      // After the first hit, disable double down option
-      document.getElementById("double").disabled = true;
-      if (calculateHand(playerHand) > 21) {
-        document.getElementById("result").innerText = "You Busted! Dealer Wins.";
-        endGame();
+      
+      // After the first hit, disable double down option for this hand
+      if (currentHand.length > 2) {
+        doubleBtn.disabled = true;
+      }
+      
+      // Check for bust
+      if (calculateHand(currentHand) > 21) {
+        if (currentHandIndex === 0 && splitHands.length > 0) {
+          // Move to next split hand
+          moveToNextHand();
+        } else if (currentHandIndex === splitHands.length) {
+          // All hands played, dealer's turn
+          dealerPlay();
+        } else {
+          // Single hand busted
+          showResult('Busted! Dealer wins.', 'lose');
+          endGame();
+        }
       }
     }
     
     function stand() {
       if (!gameActive) return;
-      // Dealer's turn
-      while (calculateHand(dealerHand) < 17) {
-        dealerHand.push(drawCard());
+      
+      if (currentHandIndex === 0 && splitHands.length > 0) {
+        // Move to next split hand
+        moveToNextHand();
+      } else if (currentHandIndex === splitHands.length) {
+        // All hands played, dealer's turn
+        dealerPlay();
+      } else {
+        // Single hand - dealer's turn
+        dealerPlay();
       }
-      updateDisplay();
-      checkWinner();
-      endGame();
     }
     
-    // Updated double down function
     function doubleDown() {
       if (!gameActive) return;
+      
       // Allow double down only on the initial two cards
-      if (playerHand.length !== 2) {
-        alert("Double Down is only allowed on your initial two cards.");
+      const currentHand = currentHandIndex === 0 ? playerHand : splitHands[currentHandIndex - 1];
+      
+      if (currentHand.length !== 2) {
+        showResult('Double Down is only allowed on your initial two cards.', 'lose');
         return;
       }
+      
       if (balance < betAmount) {
-        alert("Not enough balance to double down!");
+        showResult('Not enough balance to double down!', 'lose');
         return;
       }
-      // Deduct an additional bet and double the total bet amount
+      
+      // Deduct an additional bet and double the total bet amount for this hand
       balance -= betAmount;
-      betAmount *= 2;
-      document.getElementById("balance").innerText = balance;
+      updateBalance();
+      currentBetEl.textContent = betAmount * 2;
       
-      // Disable further actions
-      document.getElementById("hit").disabled = true;
-      document.getElementById("stand").disabled = true;
-      document.getElementById("double").disabled = true;
+      // Draw exactly one card
+      currentHand.push(drawCard());
       
-      // Draw exactly one card for double down
-      playerHand.push(drawCard());
+      // Disable further actions for this hand
+      hitBtn.disabled = true;
+      standBtn.disabled = true;
+      doubleBtn.disabled = true;
+      
       updateDisplay();
       
       // Check for bust after the extra card
-      if (calculateHand(playerHand) > 21) {
-        document.getElementById("result").innerText = "You Busted! Dealer Wins.";
+      if (calculateHand(currentHand) > 21) {
+        showResult('Busted after Double Down! Dealer wins.', 'lose');
         endGame();
         return;
       }
       
-      // Dealer's turn
+      // Move to next hand or dealer
+      if (currentHandIndex === 0 && splitHands.length > 0) {
+        // Move to next split hand
+        moveToNextHand();
+      } else if (currentHandIndex === splitHands.length) {
+        // All hands played, dealer's turn
+        dealerPlay();
+      } else {
+        // Single hand - dealer's turn
+        dealerPlay();
+      }
+    }
+    
+    function split() {
+      if (!gameActive) return;
+      
+      // Can only split on first hand with two equal cards
+      if (currentHandIndex !== 0 || playerHand.length !== 2 || playerHand[0].value !== playerHand[1].value) {
+        showResult('You can only split your initial two cards if they have the same value.', 'lose');
+        return;
+      }
+      
+      if (balance < betAmount) {
+        showResult('Not enough balance to split!', 'lose');
+        return;
+      }
+      
+      // Deduct another bet
+      balance -= betAmount;
+      updateBalance();
+      currentBetEl.textContent = betAmount * 2;
+      
+      // Create two split hands
+      const card1 = playerHand[0];
+      const card2 = playerHand[1];
+      
+      splitHands.push([card1, drawCard()]);
+      splitHands.push([card2, drawCard()]);
+      playerHand = [];
+      
+      // Update display
+      updateDisplay();
+    }
+    
+    function moveToNextHand() {
+      currentHandIndex++;
+      
+      if (currentHandIndex <= splitHands.length) {
+        updateDisplay();
+      } else {
+        dealerPlay();
+      }
+    }
+    
+    function dealerPlay() {
+      gameActive = false;
+      
+      // Reveal dealer's cards
+      renderHand(dealerHand, dealerHandEl, false);
+      
+      // Dealer draws until 17 or higher
       while (calculateHand(dealerHand) < 17) {
         dealerHand.push(drawCard());
+        renderHand(dealerHand, dealerHandEl, false);
       }
-      updateDisplay();
-      checkWinner();
+      
+      // Update dealer total
+      const dealerTotal = calculateHand(dealerHand);
+      dealerTotalEl.textContent = dealerTotal;
+      
+      // Evaluate all hands against dealer
+      evaluateAllHands();
+    }
+    
+    function evaluateAllHands() {
+      const dealerTotal = calculateHand(dealerHand);
+      const dealerBust = dealerTotal > 21;
+      let totalWinnings = 0;
+      let allHands = [];
+      
+      // Collect all hands to evaluate
+      if (splitHands.length > 0) {
+        allHands = splitHands;
+      } else if (playerHand.length > 0) {
+        allHands = [playerHand];
+      }
+      
+      // Evaluate each hand
+      allHands.forEach(hand => {
+        const handTotal = calculateHand(hand);
+        
+        if (handTotal > 21) {
+          // Hand already busted
+          return;
+        }
+        
+        if (dealerBust) {
+          // Dealer busted, player wins
+          totalWinnings += betAmount * 2;
+        } else if (handTotal > dealerTotal) {
+          // Player beats dealer
+          totalWinnings += betAmount * 2;
+        } else if (handTotal === dealerTotal) {
+          // Push - return bet
+          totalWinnings += betAmount;
+        }
+      });
+      
+      // Check for blackjack on original hand (if not split)
+      if (splitHands.length === 0 && playerHand.length === 2 && calculateHand(playerHand) === 21) {
+        // Blackjack pays 3:2
+        totalWinnings += Math.floor(betAmount * 2.5);
+      }
+      
+      // Update balance
+      balance += totalWinnings;
+      updateBalance();
+      updateTopUpButton();
+      
+      // Show result
+      if (totalWinnings > betAmount * (splitHands.length > 0 ? splitHands.length : 1)) {
+        showResult('You Win!', 'win');
+        createConfetti();
+      } else if (totalWinnings > 0) {
+        showResult('Push! Bet Refunded.', 'push');
+      } else {
+        showResult('Dealer Wins!', 'lose');
+      }
+      
       endGame();
     }
     
-    function checkWinner() {
-      let playerScore = calculateHand(playerHand);
-      let dealerScore = calculateHand(dealerHand);
-      let result = "";
-      if (playerScore > 21) {
-        result = "You Busted! Dealer Wins.";
-      } else if (dealerScore > 21 || playerScore > dealerScore) {
-        result = "You Win!";
-        balance += betAmount * 2;
-      } else if (playerScore < dealerScore) {
-        result = "Dealer Wins!";
-      } else {
-        result = "Push! Bet Refunded.";
-        balance += betAmount;
-      }
-      document.getElementById("result").innerText = result;
-      document.getElementById("balance").innerText = balance;
-    }
-    
-    function topUp() {
-      // Restore balance to $1000 if it is lower
-      if (balance < 1000) {
-        balance = 1000;
-        document.getElementById("balance").innerText = balance;
-      }
-    }
-    
-    function allIn() {
-      // Only allow changing bet if no game is active
-      if (!gameActive) {
-        document.getElementById("bet").value = balance;
+    function showResult(message, type) {
+      resultEl.textContent = message;
+      resultEl.className = type;
+      
+      if (type === 'lose') {
+        resultEl.classList.add('shake');
+        setTimeout(() => {
+          resultEl.classList.remove('shake');
+        }, 500);
       }
     }
     
     function endGame() {
       gameActive = false;
-      document.getElementById("hit").disabled = true;
-      document.getElementById("stand").disabled = true;
-      document.getElementById("double").disabled = true;
+      updateButtonStates();
     }
+    
+    function allIn() {
+      if (!gameActive) {
+        betInput.value = balance;
+        updateHintCost();
+      }
+    }
+    
+    function topUp() {
+      if (balance < 1000) {
+        balance = 1000;
+        updateBalance();
+        updateTopUpButton();
+        showResult('Balance topped up to $1000', 'info');
+        setTimeout(() => {
+          resultEl.textContent = '';
+          resultEl.className = '';
+        }, 2000);
+      }
+    }
+    
+    function updateBalance() {
+      balanceEl.textContent = balance;
+    }
+    
+    function createConfetti() {
+      const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+      
+      for (let i = 0; i < 150; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.width = Math.random() * 10 + 5 + 'px';
+          confetti.style.height = Math.random() * 10 + 5 + 'px';
+          confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+          
+          document.body.appendChild(confetti);
+          
+          let duration = Math.random() * 3 + 2;
+          confetti.style.animation = `fall ${duration}s linear forwards`;
+          
+          // Create keyframes for falling animation
+          const style = document.createElement('style');
+          style.innerHTML = `
+            @keyframes fall {
+              to {
+                top: 100vh;
+                transform: rotate(${Math.random() * 360}deg);
+                opacity: 0;
+              }
+            }
+          `;
+          document.head.appendChild(style);
+          
+          // Remove confetti after animation
+          setTimeout(() => {
+            confetti.remove();
+            style.remove();
+          }, duration * 1000);
+        }, Math.random() * 1000);
+      }
+    }
+    
+    // Event listeners for bet input changes
+    betInput.addEventListener('input', function() {
+      updateHintCost();
+    });
+    
+    // Initialize game
+    initGame();
   </script>
 </body>
 </html>
